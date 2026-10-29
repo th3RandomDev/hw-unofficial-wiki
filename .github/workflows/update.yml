@@ -1,0 +1,43 @@
+name: Update site
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # every hour, at minute 17
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+  push:
+    branches: [main]        # redeploys whenever you push a change
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Download the sheets and build the site
+        run: STRICT=1 bash update.sh
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
