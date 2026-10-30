@@ -10,7 +10,6 @@ declare -A SHEETS=(
 
 for f in wiki.xlsx traits2.xlsx stigma.xlsx; do
   echo "Downloading $f ..."
-  # an .xlsx is a zip file, so it must start with "PK"; anything else is an error/login page
   if curl -fsSL --retry 2 -o "$f.tmp" "${SHEETS[$f]}" && head -c 2 "$f.tmp" | grep -q PK; then
     mv "$f.tmp" "$f"
   else
@@ -34,4 +33,5 @@ echo "Parsing..."
 "$PY" parse_sheet.py wiki.xlsx build "${extra[@]}" || exit 1
 
 [ -f index.html ] && cp index.html build/index.html
+[ -d assets ] && { mkdir -p build/assets && cp -R assets/. build/assets/; }
 echo "Done. To preview: cd build && python3 -m http.server 8000"
