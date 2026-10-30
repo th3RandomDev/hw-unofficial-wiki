@@ -2,10 +2,10 @@ name: Update site
 
 on:
   schedule:
-    - cron: "17 * * * *"   # every hour, at minute 17
-  workflow_dispatch:        # lets you run it by hand from the Actions tab
+    - cron: "17 * * * *"
+  workflow_dispatch:       
   push:
-    branches: [main]        # redeploys whenever you push a change
+    branches: [main]        
 
 permissions:
   contents: read

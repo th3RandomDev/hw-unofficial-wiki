@@ -6,14 +6,12 @@ from PIL import Image
 import openpyxl
 from openpyxl_image_loader import SheetImageLoader
 
-# Configuration
 EXCEL_FILE = "HORIZON WALKER WIKI (UNOFFICIAL).xlsx"
 OUTPUT_DATA_FILE = "site_data.json"
 IMAGE_DIR = "images"
 
 RARITY_SHEETS = ['EX Units', 'SS Units', 'S Units', 'A Units']
 
-# Known name discrepancies across tabs
 NAME_ALIASES = {
     "matrotho": "Martrotho",
     "yui": "Yui Matsumoto",
@@ -37,7 +35,7 @@ def process_and_save_image(img_data, filename):
         image = Image.open(io.BytesIO(img_data))
         if image.mode in ("RGBA", "P"):
             image = image.convert("RGBA")
-        image.thumbnail((800, 800))  # Max bounding box constraint
+        image.thumbnail((800, 800))  
         image.save(out_path, "WEBP", quality=80, optimize=True)
         return out_path
     except Exception as e:
@@ -59,19 +57,16 @@ def parse_workbook():
         ws = wb[sheet_name]
         print(f"Parsing sheet: {sheet_name}...")
         
-        # Initialize openpyxl image loader
         try:
             image_loader = SheetImageLoader(ws)
         except Exception:
             image_loader = None
             print(f"Notice: No floating images extracted directly from {sheet_name}")
 
-        # Basic scanning for character section blocks
         for row in range(1, ws.max_row + 1):
             for col in range(1, ws.max_column + 1):
                 cell_value = str(ws.cell(row=row, column=col).value or "").strip()
                 
-                # Identify potential unit headers based on 'Grade :' or section labels
                 if "Grade :" in cell_value or "GRADE :" in cell_value:
                     header_cell = ws.cell(row=max(1, row - 1), column=col).value
                     if header_cell:
@@ -91,7 +86,6 @@ def parse_workbook():
 
     print(f"\nExtracted {len(characters)} character records.")
 
-    # Write output to JSON
     with open(OUTPUT_DATA_FILE, "w", encoding="utf-8") as f:
         json.dump({"characters": characters}, f, indent=2, ensure_ascii=False)
         
